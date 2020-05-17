@@ -1,0 +1,44 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-public-es-kibana
+  namespace: elasticsearch
+  annotations:
+    # Use the nginx ingress controller, not the cloud-provider default one
+    kubernetes.io/ingress.class: "nginx"
+
+    # Rewrite routes: eg. "/elasticsearch/_cat/nodes" to "/_cat/nodes"
+    nginx.ingress.kubernetes.io/rewrite-target: "/$1"
+
+    # If the ES cluster is already configured to use TLS,
+    # use https to reach the cluster.
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+
+    # Auto-generate a Let's Encrypt certificate with cert-manager
+    # certmanager.k8s.io/issuer: "letsencrypt-frankfurt"
+    certmanager.k8s.io/acme-challenge-type: http01
+
+    # Restrict access to a range of IP addresses
+    # nginx.ingress.kubernetes.io/whitelist-source-range: 10.0.0.0/24,35.26.87.5
+
+spec:
+  rules:
+  - host: es.fra.pool.bitcoin.com
+    http:
+      paths:
+        - path: /elasticsearch/?(.*)
+          backend:
+            # specify the ES service name
+            serviceName: elasticsearch-prod-es-http
+            servicePort: 9200
+        - path: /kibana/?(.*)
+          backend:
+            # specify the kibana service name
+            serviceName: kibana-prod-kb-http
+            servicePort: 5601
+  tls:
+    # TLS termination configuration
+    # see https://github.com/kubernetes/ingress-nginx/tree/master/docs/examples/tls-termination
+    - hosts:
+      - es.fra.pool.bitcoin.com
+      secretName: wildcard-fra-tls
