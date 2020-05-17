@@ -5,7 +5,7 @@ Elastic Cloud on Kubernetes
 `kubectl create namespace elasticsearch`
 
 # Deploy operator to newly created namespace
-`kubectl apply -f https://download.elastic.co/downloads/eck/1.0.0/all-in-one.yaml` -n elasticsearch
+`kubectl apply -f https://download.elastic.co/downloads/eck/1.0.0/all-in-one.yaml -n elasticsearch`
 
 # Deploy config
 `kubectl apply - f es.yaml -n elasticsearch`
